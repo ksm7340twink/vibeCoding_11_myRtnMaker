@@ -1,0 +1,1421 @@
+/* ==========================================================================
+   PULSE TIMER — Dark Sporty Workout & Interval Timer Stylesheet
+   ========================================================================== */
+
+:root {
+  /* 기본 다크 팔레트 */
+  --bg-base: #090c12;
+  --bg-surface: #121824;
+  --bg-surface-2: #182030;
+  --bg-input: #0e131d;
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.16);
+
+  /* 텍스트 */
+  --text-primary: #f4f7fb;
+  --text-secondary: #9aa7bd;
+  --text-muted: #6c7a93;
+
+  /* 스포티 포인트 컬러 */
+  --neon-green: #00ff7f;
+  --neon-green-dim: rgba(0, 255, 127, 0.18);
+  --electric-blue: #00d4ff;
+  --electric-blue-dim: rgba(0, 212, 255, 0.18);
+  --crimson-red: #ff3b5c;
+  --crimson-red-dim: rgba(255, 59, 92, 0.2);
+  --amber: #ffb800;
+
+  /* 상태별 동적 테마 변수 (기본: 대기/회색 계열) */
+  --phase-bg-start: #1a202c;
+  --phase-bg-end: #273041;
+  --phase-accent: #94a3b8;
+  --phase-glow: rgba(148, 163, 184, 0.2);
+  --phase-border: rgba(148, 163, 184, 0.32);
+  --phase-badge-bg: rgba(148, 163, 184, 0.22);
+  --phase-badge-text: #e2e8f0;
+  --body-tint: rgba(148, 163, 184, 0.06);
+
+  /* 타이포그래피 & 레이아웃 */
+  --font-display: 'Chakra Petch', 'Segoe UI', system-ui, sans-serif;
+  --font-sans: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --radius-lg: 22px;
+  --radius-md: 14px;
+  --radius-sm: 10px;
+  --shadow-lg: 0 20px 50px rgba(0, 0, 0, 0.45);
+  --transition-phase: 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ==========================================================================
+   상태별 색상 시각화 (초록=운동 / 빨강=휴식 / 회색=대기·준비·일시정지 / 블루=완료)
+   ========================================================================== */
+[data-phase="idle"],
+[data-phase="prep"],
+[data-phase="paused"] {
+  --phase-bg-start: #1a202c;
+  --phase-bg-end: #2a3344;
+  --phase-accent: #cbd5e1;
+  --phase-glow: rgba(148, 163, 184, 0.22);
+  --phase-border: rgba(148, 163, 184, 0.34);
+  --phase-badge-bg: rgba(148, 163, 184, 0.22);
+  --phase-badge-text: #f1f5f9;
+  --body-tint: rgba(148, 163, 184, 0.07);
+}
+
+[data-phase="prep"] {
+  --phase-accent: var(--electric-blue);
+  --phase-glow: rgba(0, 212, 255, 0.28);
+  --phase-border: rgba(0, 212, 255, 0.42);
+  --phase-badge-bg: rgba(0, 212, 255, 0.2);
+  --phase-badge-text: #8ceeff;
+}
+
+[data-phase="work"] {
+  --phase-bg-start: #062b16;
+  --phase-bg-end: #0d542b;
+  --phase-accent: #00ff7f;
+  --phase-glow: rgba(0, 255, 127, 0.38);
+  --phase-border: rgba(0, 255, 127, 0.55);
+  --phase-badge-bg: rgba(0, 255, 127, 0.22);
+  --phase-badge-text: #80ffbf;
+  --body-tint: rgba(0, 255, 127, 0.14);
+}
+
+[data-phase="rest"] {
+  --phase-bg-start: #3a0914;
+  --phase-bg-end: #6b1124;
+  --phase-accent: #ff4769;
+  --phase-glow: rgba(255, 59, 92, 0.4);
+  --phase-border: rgba(255, 59, 92, 0.58);
+  --phase-badge-bg: rgba(255, 59, 92, 0.25);
+  --phase-badge-text: #ff9eb0;
+  --body-tint: rgba(255, 59, 92, 0.15);
+}
+
+[data-phase="completed"] {
+  --phase-bg-start: #07233b;
+  --phase-bg-end: #0e4470;
+  --phase-accent: #00d4ff;
+  --phase-glow: rgba(0, 212, 255, 0.36);
+  --phase-border: rgba(0, 212, 255, 0.55);
+  --phase-badge-bg: rgba(0, 212, 255, 0.22);
+  --phase-badge-text: #99eeff;
+  --body-tint: rgba(0, 212, 255, 0.13);
+}
+
+/* ==========================================================================
+   Reset & Base
+   ========================================================================== */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+html {
+  font-size: 16px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  min-height: 100dvh;
+  font-family: var(--font-sans);
+  background-color: var(--bg-base);
+  background-image:
+    radial-gradient(circle at 20% 0%, var(--body-tint), transparent 55%),
+    radial-gradient(circle at 85% 100%, rgba(0, 212, 255, 0.06), transparent 45%);
+  color: var(--text-primary);
+  line-height: 1.5;
+  transition: background-image var(--transition-phase);
+  overflow-x: hidden;
+}
+
+body.modal-open {
+  overflow: hidden;
+}
+
+button,
+input,
+select {
+  font-family: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+
+button:disabled,
+input:disabled,
+select:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+/* ==========================================================================
+   App Shell & Header
+   ========================================================================== */
+.app-shell {
+  width: 100%;
+  max-width: 1380px;
+  margin: 0 auto;
+  padding: 16px 20px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.brand-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--neon-green);
+  box-shadow: 0 0 14px var(--neon-green);
+}
+
+.brand-title {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--text-primary);
+}
+
+.brand-title span {
+  color: var(--electric-blue);
+  margin-left: 4px;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  min-height: 40px;
+  border-radius: 999px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-primary);
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: border-color 0.2s, background 0.2s, transform 0.15s;
+}
+
+.icon-btn:hover {
+  border-color: var(--electric-blue);
+  background: var(--bg-surface-2);
+}
+
+.icon-btn[aria-pressed="true"] {
+  border-color: var(--electric-blue);
+  background: var(--electric-blue-dim);
+  color: #a8f0ff;
+}
+
+/* ==========================================================================
+   Main Workspace Layout (Desktop 2-Column)
+   ========================================================================== */
+.workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1.18fr) minmax(360px, 0.92fr);
+  gap: 22px;
+  align-items: start;
+}
+
+.timer-column {
+  position: sticky;
+  top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.config-column {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* 집중 모드 (운동 중 디스플레이 꽉 채우기) */
+body.focus-mode .workspace {
+  grid-template-columns: 1fr;
+  max-width: 960px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+body.focus-mode .config-column {
+  display: none;
+}
+
+body.focus-mode .timer-column {
+  position: static;
+  min-height: calc(100dvh - 100px);
+  justify-content: center;
+}
+
+body.focus-mode .display-panel {
+  flex: 1;
+  min-height: 62dvh;
+}
+
+/* ==========================================================================
+   Main Timer Display Panel
+   ========================================================================== */
+.display-panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 24px 26px;
+  min-height: 470px;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(155deg, var(--phase-bg-start) 0%, var(--phase-bg-end) 100%);
+  border: 2px solid var(--phase-border);
+  box-shadow: var(--shadow-lg), 0 0 42px var(--phase-glow);
+  transition:
+    background var(--transition-phase),
+    border-color var(--transition-phase),
+    box-shadow var(--transition-phase);
+  overflow: hidden;
+}
+
+.display-panel::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 35%, rgba(255, 255, 255, 0.06), transparent 65%);
+  pointer-events: none;
+}
+
+.display-top-bar {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.phase-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 16px;
+  border-radius: 999px;
+  background: var(--phase-badge-bg);
+  border: 1px solid var(--phase-border);
+  color: var(--phase-badge-text);
+  font-size: 0.92rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.phase-badge::before {
+  content: '';
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--phase-accent);
+  box-shadow: 0 0 10px var(--phase-accent);
+}
+
+.stage-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.meta-pill {
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.32);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  font-family: var(--font-display);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.meta-type {
+  color: var(--electric-blue);
+  border-color: rgba(0, 212, 255, 0.3);
+}
+
+/* 중앙 메인 영역 */
+.display-center {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 6px;
+  padding: 8px 0;
+}
+
+.current-stage-name {
+  font-size: clamp(1.7rem, 4.2vw, 2.9rem);
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  color: #ffffff;
+  text-shadow: 0 4px 18px rgba(0, 0, 0, 0.45);
+  word-break: keep-all;
+  max-width: 100%;
+}
+
+.round-display {
+  font-family: var(--font-display);
+  font-size: clamp(1.15rem, 2.4vw, 1.65rem);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--phase-accent);
+  text-shadow: 0 0 16px var(--phase-glow);
+}
+
+.timer-value {
+  font-family: var(--font-display);
+  font-size: clamp(4.8rem, 15vw, 9.8rem);
+  font-weight: 700;
+  line-height: 0.98;
+  letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums;
+  color: #ffffff;
+  text-shadow:
+    0 6px 28px rgba(0, 0, 0, 0.5),
+    0 0 34px var(--phase-glow);
+  margin: 6px 0;
+  user-select: none;
+}
+
+.timer-value.is-countdown-warning {
+  color: #fff6a8;
+  transform: scale(1.03);
+  transition: transform 0.12s ease;
+}
+
+.timer-subtext {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.8);
+  min-height: 1.5em;
+}
+
+/* 진행률 바 & 스테이지 도트 */
+.progress-section {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.progress-track {
+  width: 100%;
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.35);
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  width: 0%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--electric-blue), var(--phase-accent));
+  box-shadow: 0 0 14px var(--phase-glow);
+  transition: width 0.1s linear, background 0.3s ease;
+}
+
+.progress-fill.is-indeterminate {
+  width: 100% !important;
+  background: linear-gradient(
+    90deg,
+    rgba(0, 212, 255, 0.25) 0%,
+    var(--neon-green) 50%,
+    rgba(0, 212, 255, 0.25) 100%
+  );
+  background-size: 200% 100%;
+  animation: pulseSlide 1.8s linear infinite;
+}
+
+@keyframes pulseSlide {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.stage-dots {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.stage-dot {
+  height: 6px;
+  width: 24px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.2);
+  transition: all 0.25s ease;
+}
+
+.stage-dot.is-done {
+  background: rgba(255, 255, 255, 0.65);
+}
+
+.stage-dot.is-active {
+  width: 38px;
+  background: var(--phase-accent);
+  box-shadow: 0 0 10px var(--phase-accent);
+}
+
+/* Next 배너 */
+.next-banner {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: var(--radius-md);
+  background: rgba(0, 0, 0, 0.32);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.next-label {
+  flex-shrink: 0;
+  padding: 3px 9px;
+  border-radius: 6px;
+  background: var(--electric-blue-dim);
+  color: var(--electric-blue);
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.next-text {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.92);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ==========================================================================
+   Controls Panel (큼직한 터치 버튼)
+   ========================================================================== */
+.controls-panel {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.ctrl-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-height: 68px;
+  padding: 10px 8px;
+  border-radius: var(--radius-md);
+  font-size: 0.95rem;
+  font-weight: 800;
+  border: 1px solid transparent;
+  transition: transform 0.12s ease, box-shadow 0.2s ease, background 0.2s ease, opacity 0.2s ease;
+  user-select: none;
+}
+
+.ctrl-btn:not(:disabled):active {
+  transform: scale(0.96);
+}
+
+.ctrl-icon {
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.ctrl-primary {
+  background: linear-gradient(135deg, #00e676, #00c853);
+  color: #041b0c;
+  box-shadow: 0 8px 24px rgba(0, 230, 118, 0.28);
+}
+
+.ctrl-primary:not(:disabled):hover {
+  box-shadow: 0 10px 28px rgba(0, 255, 127, 0.42);
+}
+
+.ctrl-warning {
+  background: var(--bg-surface-2);
+  border-color: rgba(255, 184, 0, 0.35);
+  color: #ffd15c;
+}
+
+.ctrl-warning:not(:disabled):hover {
+  background: rgba(255, 184, 0, 0.16);
+}
+
+.ctrl-accent {
+  background: linear-gradient(135deg, rgba(0, 212, 255, 0.22), rgba(0, 145, 255, 0.25));
+  border-color: rgba(0, 212, 255, 0.5);
+  color: #9bf0ff;
+}
+
+.ctrl-accent:not(:disabled):hover {
+  background: rgba(0, 212, 255, 0.32);
+  box-shadow: 0 6px 20px rgba(0, 212, 255, 0.25);
+}
+
+.ctrl-danger {
+  background: var(--bg-surface-2);
+  border-color: rgba(255, 59, 92, 0.35);
+  color: #ff879c;
+}
+
+.ctrl-danger:not(:disabled):hover {
+  background: rgba(255, 59, 92, 0.18);
+}
+
+/* 대기 시간 설정 & 루틴 요약 바 */
+.prep-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: var(--radius-md);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+}
+
+.prep-control {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.prep-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.prep-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-input);
+  border: 1px solid var(--border-strong);
+}
+
+.prep-input-wrap input {
+  width: 52px;
+  border: none;
+  background: transparent;
+  text-align: right;
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--electric-blue);
+  outline: none;
+}
+
+.prep-input-wrap .unit {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.routine-summary {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+/* ==========================================================================
+   Cards (Stage Builder & Saved Routines)
+   ========================================================================== */
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 20px;
+  border-radius: var(--radius-lg);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.card-title {
+  font-size: 1.12rem;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.card-desc {
+  margin-top: 2px;
+  font-size: 0.84rem;
+  color: var(--text-secondary);
+}
+
+.lock-notice {
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  background: rgba(255, 184, 0, 0.12);
+  border: 1px solid rgba(255, 184, 0, 0.35);
+  color: #ffe08a;
+  font-size: 0.85rem;
+}
+
+.save-routine-bar {
+  display: flex;
+  gap: 8px;
+}
+
+.select-input,
+.text-input {
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+  height: 44px;
+  padding: 0 12px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-input);
+  border: 1px solid var(--border-strong);
+  font-size: 0.92rem;
+  color: var(--text-primary);
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.select-input:focus,
+.text-input:focus {
+  border-color: var(--electric-blue);
+}
+
+.action-btn {
+  flex-shrink: 0;
+  height: 44px;
+  padding: 0 18px;
+  border-radius: var(--radius-sm);
+  font-size: 0.92rem;
+  font-weight: 800;
+  transition: transform 0.12s, filter 0.2s, background 0.2s, box-shadow 0.2s;
+}
+
+.action-btn:not(:disabled):active {
+  transform: scale(0.97);
+}
+
+.action-primary {
+  background: linear-gradient(135deg, var(--electric-blue), #0095ff);
+  color: #031524;
+  box-shadow: 0 6px 18px rgba(0, 212, 255, 0.28);
+}
+
+.action-primary:not(:disabled):hover {
+  filter: brightness(1.08);
+  box-shadow: 0 8px 24px rgba(0, 212, 255, 0.4);
+}
+
+.action-secondary {
+  background: var(--neon-green-dim);
+  border: 1px solid rgba(0, 255, 127, 0.45);
+  color: var(--neon-green);
+}
+
+.action-secondary:not(:disabled):hover {
+  background: rgba(0, 255, 127, 0.26);
+}
+
+.action-ghost {
+  background: var(--bg-surface-2);
+  border: 1px solid var(--border-strong);
+  color: var(--text-secondary);
+}
+
+.action-ghost:hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* ==========================================================================
+   Stage Cards List
+   ========================================================================== */
+.stage-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.empty-state {
+  padding: 24px 16px;
+  border-radius: var(--radius-md);
+  border: 1px dashed var(--border-strong);
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.stage-item {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+  border-radius: var(--radius-md);
+  background: var(--bg-surface-2);
+  border: 1px solid var(--border-subtle);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.stage-item.is-current {
+  border-color: var(--neon-green);
+  box-shadow: 0 0 0 1px rgba(0, 255, 127, 0.35), 0 8px 24px rgba(0, 255, 127, 0.12);
+}
+
+.stage-item-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.stage-index-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  flex: 1;
+}
+
+.stage-num {
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  background: rgba(0, 212, 255, 0.16);
+  color: var(--electric-blue);
+  display: grid;
+  place-items: center;
+  font-family: var(--font-display);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.stage-item.is-current .stage-num {
+  background: var(--neon-green);
+  color: #031b0b;
+}
+
+.stage-type-select {
+  height: 32px;
+  padding: 0 8px;
+  border-radius: 8px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-strong);
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--electric-blue);
+  outline: none;
+}
+
+.stage-item-tools {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.mini-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+  display: grid;
+  place-items: center;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.mini-btn:not(:disabled):hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--text-primary);
+}
+
+.mini-btn.btn-del:not(:disabled):hover {
+  background: var(--crimson-red-dim);
+  border-color: rgba(255, 59, 92, 0.45);
+  color: #ff8ca0;
+}
+
+/* 스테이지 입력 그리드 */
+.stage-fields {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+}
+
+.field-name {
+  width: 100%;
+  height: 38px;
+  padding: 0 12px;
+  border-radius: 9px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-subtle);
+  font-size: 0.94rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  outline: none;
+}
+
+.field-name:focus {
+  border-color: var(--electric-blue);
+}
+
+.stage-numbers-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.num-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.num-field label {
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.num-field input {
+  width: 100%;
+  height: 36px;
+  padding: 0 10px;
+  border-radius: 8px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-subtle);
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  outline: none;
+}
+
+.num-field input:focus {
+  border-color: var(--neon-green);
+}
+
+.manual-badge {
+  height: 36px;
+  padding: 0 8px;
+  border-radius: 8px;
+  background: rgba(0, 212, 255, 0.1);
+  border: 1px dashed rgba(0, 212, 255, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: var(--electric-blue);
+  white-space: nowrap;
+}
+
+/* ==========================================================================
+   Saved Routines List
+   ========================================================================== */
+.routine-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.routine-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+  background: var(--bg-surface-2);
+  border: 1px solid var(--border-subtle);
+  transition: border-color 0.2s;
+}
+
+.routine-item:hover {
+  border-color: rgba(0, 212, 255, 0.35);
+}
+
+.routine-info {
+  min-width: 0;
+  flex: 1;
+}
+
+.routine-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.routine-meta {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+
+.routine-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.btn-load {
+  padding: 7px 12px;
+  border-radius: 8px;
+  background: var(--electric-blue-dim);
+  border: 1px solid rgba(0, 212, 255, 0.4);
+  color: #9beeff;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.btn-load:hover {
+  background: rgba(0, 212, 255, 0.28);
+}
+
+/* ==========================================================================
+   Add Stage Modal
+   ========================================================================== */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(4, 7, 13, 0.78);
+  backdrop-filter: blur(8px);
+  animation: fadeIn 0.18s ease forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.modal-card {
+  width: 100%;
+  max-width: 480px;
+  border-radius: var(--radius-lg);
+  background: var(--bg-surface);
+  border: 1px solid rgba(0, 212, 255, 0.35);
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.65), 0 0 32px rgba(0, 212, 255, 0.12);
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  animation: modalPop 0.22s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes modalPop {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.modal-title {
+  font-size: 1.2rem;
+  font-weight: 900;
+  color: var(--text-primary);
+}
+
+.modal-subtitle {
+  margin-top: 2px;
+  font-size: 0.84rem;
+  color: var(--text-secondary);
+}
+
+.modal-close-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+  font-size: 1rem;
+  display: grid;
+  place-items: center;
+}
+
+.modal-close-btn:hover {
+  background: rgba(255, 255, 255, 0.14);
+  color: var(--text-primary);
+}
+
+.modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.modal-field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.modal-label {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+.type-selector {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.type-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 12px 8px;
+  border-radius: var(--radius-md);
+  background: var(--bg-input);
+  border: 1.5px solid var(--border-strong);
+  text-align: center;
+  transition: border-color 0.2s, background 0.2s, box-shadow 0.2s, transform 0.12s;
+}
+
+.type-card:hover {
+  border-color: rgba(0, 212, 255, 0.55);
+}
+
+.type-card.is-selected {
+  background: rgba(0, 212, 255, 0.14);
+  border-color: var(--electric-blue);
+  box-shadow: 0 0 18px rgba(0, 212, 255, 0.22);
+}
+
+.type-card-icon {
+  font-size: 1.25rem;
+}
+
+.type-card-title {
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.type-card-sub {
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  color: var(--electric-blue);
+}
+
+.modal-numbers-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.modal-num-input {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.modal-manual-badge {
+  height: 44px;
+  font-size: 0.78rem;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+/* ==========================================================================
+   Toast Notification
+   ========================================================================== */
+.toast-container {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  transform: translateX(-50%);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  pointer-events: none;
+  width: min(92vw, 420px);
+}
+
+.toast {
+  padding: 11px 18px;
+  border-radius: 999px;
+  background: rgba(15, 23, 36, 0.94);
+  border: 1px solid var(--electric-blue);
+  color: #ffffff;
+  font-size: 0.88rem;
+  font-weight: 700;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  animation: toastIn 0.25s ease forwards;
+  text-align: center;
+}
+
+.toast.is-success {
+  border-color: var(--neon-green);
+}
+
+.toast.is-error {
+  border-color: var(--crimson-red);
+}
+
+@keyframes toastIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ==========================================================================
+   Responsive Breakpoints (태블릿 / 스마트폰 세로·가로 최적화)
+   ========================================================================== */
+@media (max-width: 1024px) {
+  .workspace {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
+  .timer-column {
+    position: static;
+  }
+
+  .display-panel {
+    min-height: 410px;
+  }
+}
+
+@media (max-width: 640px) {
+  .app-shell {
+    padding: 12px 12px 28px;
+    gap: 12px;
+  }
+
+  .brand-title {
+    font-size: 1.15rem;
+  }
+
+  .btn-text-sm {
+    display: none;
+  }
+
+  .icon-btn {
+    padding: 8px 12px;
+  }
+
+  /* 스마트폰을 바닥에 두고 볼 때 첫 화면에 디스플레이 + 컨트롤이 꽉 차게 */
+  .timer-column {
+    min-height: calc(100dvh - 76px);
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .display-panel {
+    flex: 1;
+    min-height: 360px;
+    padding: 18px 16px;
+    border-radius: 18px;
+    gap: 12px;
+  }
+
+  .timer-value {
+    font-size: clamp(4.6rem, 24vw, 7.6rem);
+  }
+
+  .current-stage-name {
+    font-size: clamp(1.5rem, 6.8vw, 2.2rem);
+  }
+
+  .controls-panel {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .ctrl-btn {
+    min-height: 58px;
+    flex-direction: row;
+    gap: 8px;
+    font-size: 0.98rem;
+  }
+
+  .prep-bar {
+    padding: 10px 12px;
+  }
+
+  .card {
+    padding: 16px 14px;
+    border-radius: 18px;
+  }
+
+  .save-routine-bar {
+    flex-direction: column;
+  }
+
+  .save-routine-bar .action-btn {
+    width: 100%;
+  }
+
+  .stage-item-header {
+    flex-wrap: wrap;
+  }
+
+  .modal-card {
+    padding: 18px 16px;
+  }
+
+  .modal-numbers-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .modal-footer {
+    flex-direction: column-reverse;
+  }
+
+  .modal-footer .action-btn {
+    width: 100%;
+  }
+}
+
+/* 모바일 가로 모드 (바닥에 가로로 눕혀 볼 때) */
+@media (max-height: 540px) and (orientation: landscape) {
+  .app-shell {
+    padding: 8px 14px 18px;
+    gap: 8px;
+  }
+
+  .timer-column {
+    min-height: calc(100dvh - 60px);
+    gap: 8px;
+  }
+
+  .display-panel {
+    min-height: 230px;
+    padding: 12px 18px;
+    gap: 6px;
+  }
+
+  .current-stage-name {
+    font-size: 1.4rem;
+  }
+
+  .round-display {
+    font-size: 1rem;
+  }
+
+  .timer-value {
+    font-size: clamp(3.6rem, 16vh, 6rem);
+    margin: 0;
+  }
+
+  .timer-subtext {
+    font-size: 0.82rem;
+  }
+
+  .next-banner {
+    padding: 8px 12px;
+  }
+
+  .controls-panel {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .ctrl-btn {
+    min-height: 46px;
+    flex-direction: row;
+    gap: 6px;
+  }
+}

@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#090C12" />
+  <title>PULSE TIMER — 운동 계획 & 인터벌 타이머</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body data-phase="idle">
+  <div class="app-shell">
+    <!-- 상단 헤더 -->
+    <header class="app-header">
+      <div class="brand">
+        <span class="brand-dot" aria-hidden="true"></span>
+        <h1 class="brand-title">PULSE<span>TIMER</span></h1>
+      </div>
+      <div class="header-actions">
+        <button id="btn-sound-toggle" class="icon-btn" type="button" aria-pressed="false" title="오디오 가이드 켜기/끄기">
+          <span id="sound-icon" aria-hidden="true">🔊</span>
+          <span id="sound-label" class="btn-text-sm">사운드 ON</span>
+        </button>
+        <button id="btn-focus-toggle" class="icon-btn" type="button" aria-pressed="false" title="운동 집중 모드 전환">
+          <span aria-hidden="true">⛶</span>
+          <span id="focus-label" class="btn-text-sm">집중 모드</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- 메인 워크스페이스 (데스크톱 2단 / 모바일 1단) -->
+    <main class="workspace">
+      <!-- 좌측/상단: 메인 타이머 디스플레이 + 컨트롤 -->
+      <section class="timer-column" aria-label="메인 타이머">
+        <div id="display-panel" class="display-panel" data-phase="idle">
+          <!-- 상단 상태 바 -->
+          <div class="display-top-bar">
+            <span id="phase-badge" class="phase-badge">대기 중</span>
+            <div class="stage-meta">
+              <span id="stage-counter" class="meta-pill">STAGE 1 / 1</span>
+              <span id="stage-type-badge" class="meta-pill meta-type">COUNT DOWN</span>
+            </div>
+          </div>
+
+          <!-- 중앙 핵심 정보 (스테이지 이름 / 라운드 / 초대형 타이머) -->
+          <div class="display-center">
+            <h2 id="current-stage-name" class="current-stage-name">운동을 추가하세요</h2>
+            <div id="round-display" class="round-display">ROUND 0 / 0</div>
+            <div id="timer-value" class="timer-value" role="timer" aria-live="off">00:00</div>
+            <p id="timer-subtext" class="timer-subtext">시작 버튼을 눌러 루틴을 시작하세요</p>
+          </div>
+
+          <!-- 진행률 바 & 스테이지 인디케이터 -->
+          <div class="progress-section">
+            <div class="progress-track" aria-hidden="true">
+              <div id="progress-bar-fill" class="progress-fill" style="width: 0%"></div>
+            </div>
+            <div id="stage-dots" class="stage-dots" aria-label="전체 스테이지 진행도"></div>
+          </div>
+
+          <!-- Next 운동 표시 배너 -->
+          <div class="next-banner" aria-live="polite">
+            <span class="next-label">NEXT</span>
+            <span id="next-exercise-text" class="next-text">다음 운동 없음</span>
+          </div>
+        </div>
+
+        <!-- 컨트롤 버튼 패널 -->
+        <div class="controls-panel" role="group" aria-label="타이머 컨트롤">
+          <button id="btn-start" class="ctrl-btn ctrl-primary" type="button">
+            <span class="ctrl-icon" aria-hidden="true">▶</span>
+            <span id="btn-start-label">시작</span>
+          </button>
+          <button id="btn-pause" class="ctrl-btn ctrl-warning" type="button" disabled>
+            <span class="ctrl-icon" aria-hidden="true">⏸</span>
+            <span>일시정지</span>
+          </button>
+          <button id="btn-next" class="ctrl-btn ctrl-accent" type="button" disabled>
+            <span class="ctrl-icon" aria-hidden="true">⏭</span>
+            <span id="btn-next-label">다음</span>
+          </button>
+          <button id="btn-reset" class="ctrl-btn ctrl-danger" type="button" disabled>
+            <span class="ctrl-icon" aria-hidden="true">↺</span>
+            <span>초기화</span>
+          </button>
+        </div>
+
+        <!-- 대기 시간 및 루틴 요약 바 -->
+        <div class="prep-bar">
+          <label class="prep-control" for="prep-seconds-input">
+            <span class="prep-title">⏱ 시작 전 대기 시간</span>
+            <div class="prep-input-wrap">
+              <input id="prep-seconds-input" type="number" min="0" max="60" step="1" value="5" inputmode="numeric" />
+              <span class="unit">초</span>
+            </div>
+          </label>
+          <div id="total-routine-info" class="routine-summary">총 0단계 · 예상 00:00</div>
+        </div>
+      </section>
+
+      <!-- 우측/하단: 스테이지 빌더 & 루틴 저장/불러오기 -->
+      <div class="config-column">
+        <!-- 스테이지 동적 구성 패널 -->
+        <section class="card builder-panel" aria-label="운동 스테이지 구성">
+          <div class="card-header">
+            <div>
+              <h3 class="card-title">운동 스테이지 구성</h3>
+              <p class="card-desc">원하는 운동 단계를 무제한으로 추가하고 순서를 조정하세요.</p>
+            </div>
+            <button id="btn-add-stage" class="action-btn action-primary" type="button">
+              <span>＋ 추가</span>
+            </button>
+          </div>
+
+          <div id="builder-lock-notice" class="lock-notice" hidden>
+            🔒 타이머 진행 중에는 기존 스테이지 수정이 잠겨 있습니다. (<strong>＋ 추가</strong>로 뒤에 새 단계를 추가하거나 <strong>초기화</strong> 후 수정할 수 있습니다.)
+          </div>
+
+          <!-- 동적 스테이지 리스트 -->
+          <div id="stage-list" class="stage-list"></div>
+        </section>
+
+        <!-- 루틴 저장 / 불러오기 패널 -->
+        <section class="card routines-panel" aria-label="루틴 저장 및 불러오기">
+          <div class="card-header">
+            <div>
+              <h3 class="card-title">루틴 저장 / 불러오기</h3>
+              <p class="card-desc">나만의 커스텀 구성을 브라우저에 저장해두고 언제든 불러오세요.</p>
+            </div>
+          </div>
+
+          <div class="save-routine-bar">
+            <input
+              id="routine-name-input"
+              class="text-input"
+              type="text"
+              maxlength="40"
+              placeholder="루틴 이름 입력 (예: 아침 전신 타바타)"
+              aria-label="저장할 루틴 이름"
+            />
+            <button id="btn-save-routine" class="action-btn action-secondary" type="button">저장</button>
+          </div>
+
+          <div id="routine-list" class="routine-list"></div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <!-- 스테이지 추가 모달 -->
+  <div id="stage-modal" class="modal-backdrop" hidden role="dialog" aria-modal="true" aria-labelledby="stage-modal-title">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div>
+          <h3 id="stage-modal-title" class="modal-title">새 운동 스테이지 추가</h3>
+          <p class="modal-subtitle">스테이지 타입과 시간, 라운드 수를 설정하세요.</p>
+        </div>
+        <button id="btn-modal-close" class="modal-close-btn" type="button" aria-label="모달 닫기">✕</button>
+      </div>
+
+      <form id="stage-modal-form" class="modal-form">
+        <!-- 타입 선택 카드 -->
+        <div class="modal-field">
+          <span class="modal-label">스테이지 타입 선택</span>
+          <div class="type-selector" role="radiogroup" aria-label="스테이지 타입">
+            <button type="button" class="type-card is-selected" data-modal-type="countdown" aria-checked="true" role="radio">
+              <span class="type-card-icon" aria-hidden="true">⏱</span>
+              <span class="type-card-title">시간제한</span>
+              <span class="type-card-sub">Count Down</span>
+            </button>
+            <button type="button" class="type-card" data-modal-type="tabata" aria-checked="false" role="radio">
+              <span class="type-card-icon" aria-hidden="true">🔥</span>
+              <span class="type-card-title">타바타</span>
+              <span class="type-card-sub">Work / Rest</span>
+            </button>
+            <button type="button" class="type-card" data-modal-type="countup" aria-checked="false" role="radio">
+              <span class="type-card-icon" aria-hidden="true">🏁</span>
+              <span class="type-card-title">랩 타임</span>
+              <span class="type-card-sub">Count Up</span>
+            </button>
+          </div>
+          <input id="modal-stage-type" type="hidden" value="countdown" />
+        </div>
+
+        <!-- 운동 이름 -->
+        <div class="modal-field">
+          <label class="modal-label" for="modal-stage-name">운동 이름</label>
+          <input
+            id="modal-stage-name"
+            class="text-input"
+            type="text"
+            maxlength="40"
+            placeholder="예: 버피 테스트, 플랭크, 스쿼트"
+            autocomplete="off"
+          />
+        </div>
+
+        <!-- 숫자 설정 그리드 -->
+        <div class="modal-numbers-grid">
+          <div class="modal-field">
+            <label class="modal-label" for="modal-work-seconds">운동 시간(초)</label>
+            <input
+              id="modal-work-seconds"
+              class="text-input modal-num-input"
+              type="number"
+              min="1"
+              max="3600"
+              value="30"
+              inputmode="numeric"
+            />
+            <div id="modal-work-manual" class="manual-badge modal-manual-badge" hidden>
+              수동 전환 ('다음' 버튼)
+            </div>
+          </div>
+
+          <div class="modal-field">
+            <label class="modal-label" for="modal-rest-seconds">휴식 시간(초)</label>
+            <input
+              id="modal-rest-seconds"
+              class="text-input modal-num-input"
+              type="number"
+              min="0"
+              max="600"
+              value="10"
+              inputmode="numeric"
+            />
+          </div>
+
+          <div class="modal-field">
+            <label class="modal-label" for="modal-rounds">라운드 수</label>
+            <input
+              id="modal-rounds"
+              class="text-input modal-num-input"
+              type="number"
+              min="1"
+              max="99"
+              value="3"
+              inputmode="numeric"
+            />
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button id="btn-modal-cancel" class="action-btn action-ghost" type="button">취소</button>
+          <button id="btn-modal-submit" class="action-btn action-primary" type="submit">＋ 스테이지 추가</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 토스트 알림 -->
+  <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+  <!-- file:// 및 http:// 양쪽 모두에서 CORS 오류 없이 동작하도록 순서대로 로드 -->
+  <script defer src="js/storage.js"></script>
+  <script defer src="js/audioEngine.js"></script>
+  <script defer src="js/timerEngine.js"></script>
+  <script defer src="js/ui.js"></script>
+  <script defer src="js/main.js"></script>
+</body>
+</html>
